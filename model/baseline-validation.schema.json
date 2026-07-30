@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bbcds.local/baseline-validation.schema.json",
+  "title": "BBCDS Baseline Validation Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "reportId",
+    "createdAt",
+    "trainingCommit",
+    "datasetManifestHash",
+    "taxonomyVersion",
+    "labels",
+    "model",
+    "evaluation",
+    "approval"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "reportId": { "type": "string", "minLength": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "trainingCommit": { "type": "string", "minLength": 7 },
+    "datasetManifestHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "taxonomyVersion": { "type": "string", "minLength": 1 },
+    "labels": {
+      "type": "array",
+      "prefixItems": [
+        { "const": "Safe" },
+        { "const": "Suggestive" },
+        { "const": "Explicit" },
+        { "const": "Explicit Illustration" }
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["architecture", "inputShape", "checkpointReference"],
+      "properties": {
+        "architecture": { "const": "MobileNetV3-Small" },
+        "inputShape": {
+          "type": "array",
+          "prefixItems": [
+            { "const": 1 },
+            { "const": 224 },
+            { "const": 224 },
+            { "const": 3 }
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "checkpointReference": { "$ref": "#/$defs/protectedReference" },
+        "thresholdRationale": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "split", "metrics", "limitations"],
+      "properties": {
+        "scope": { "type": "string", "minLength": 1 },
+        "split": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "recordCount", "sourceGroupCount"],
+          "properties": {
+            "name": { "enum": ["validation", "test", "holdout"] },
+            "recordCount": { "type": "integer", "minimum": 1 },
+            "sourceGroupCount": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["macroF1", "perClass", "confusionMatrixReference"],
+          "properties": {
+            "macroF1": { "$ref": "#/$defs/rate" },
+            "perClass": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": { "$ref": "#/$defs/classMetric" }
+            },
+            "confusionMatrixReference": {
+              "$ref": "#/$defs/protectedReference"
+            },
+            "factorBreakdownReference": {
+              "$ref": "#/$defs/protectedReference"
+            }
+          }
+        },
+        "calibration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "enum": ["not-evaluated", "exploratory", "approved"]
+            },
+            "notes": { "type": "string" }
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["draft", "approved", "rejected"] },
+        "approvedAt": { "type": "string", "format": "date-time" },
+        "approver": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "classMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "support", "precision", "recall", "f1"],
+      "properties": {
+        "label": {
+          "enum": ["Safe", "Suggestive", "Explicit", "Explicit Illustration"]
+        },
+        "support": { "type": "integer", "minimum": 0 },
+        "precision": { "$ref": "#/$defs/rate" },
+        "recall": { "$ref": "#/$defs/rate" },
+        "f1": { "$ref": "#/$defs/rate" }
+      }
+    },
+    "protectedReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "uri", "sha256"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "uri": { "type": "string", "minLength": 1 },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}

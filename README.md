@@ -36,6 +36,7 @@ Agent and contributor guidance:
 - `docs/testing.md`: testing strategy and fixture policy.
 - `docs/benchmarking.md`: benchmark methodology and report requirements.
 - `docs/model-card.md`: model scope and limitations.
+- `docs/data-card.md`: protected dataset governance template.
 - `model/`: model contract, canonical labels, and future artifact manifest schema.
 - `PRIVACY.md`: browser-only privacy requirements.
 - `SECURITY.md`: security reporting and dependency expectations.
