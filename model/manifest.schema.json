@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bbcds.local/model-manifest.schema.json",
+  "title": "BBCDS Model Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "modelId",
+    "semanticVersion",
+    "sha256",
+    "trainingCommit",
+    "datasetManifestHash",
+    "labels",
+    "inputShape",
+    "inputDType",
+    "inputRange",
+    "quantizationMode",
+    "thresholdsVersion",
+    "minimumRuntimeVersion"
+  ],
+  "properties": {
+    "modelId": { "type": "string", "minLength": 1 },
+    "semanticVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "trainingCommit": { "type": "string", "minLength": 7 },
+    "datasetManifestHash": { "type": "string", "minLength": 1 },
+    "labels": {
+      "type": "array",
+      "prefixItems": [
+        { "const": "Safe" },
+        { "const": "Suggestive" },
+        { "const": "Explicit" },
+        { "const": "Explicit Illustration" }
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "inputShape": {
+      "type": "array",
+      "prefixItems": [
+        { "const": 1 },
+        { "const": 224 },
+        { "const": 224 },
+        { "const": 3 }
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "inputDType": { "const": "float32" },
+    "inputRange": {
+      "type": "array",
+      "prefixItems": [{ "const": 0 }, { "const": 255 }],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "quantizationMode": { "type": "string", "minLength": 1 },
+    "thresholdsVersion": { "type": "string", "minLength": 1 },
+    "minimumRuntimeVersion": { "type": "string", "minLength": 1 }
+  }
+}
