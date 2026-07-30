@@ -1,0 +1,8 @@
+node_modules
+.agents
+.codex
+dist
+dist-ssr
+coverage
+playwright-report
+test-results
