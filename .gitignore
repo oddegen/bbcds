@@ -22,6 +22,7 @@ model/artifacts/
 model/benchmarks/
 model/checkpoints/
 model/datasets/
+model/reports/protected/
 public/models/
 model/**/*.tflite
 

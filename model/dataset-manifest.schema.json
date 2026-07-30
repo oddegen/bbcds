@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bbcds.local/dataset-manifest.schema.json",
+  "title": "BBCDS Protected Dataset Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "manifestId",
+    "createdAt",
+    "taxonomyVersion",
+    "labels",
+    "entries",
+    "summary",
+    "splitPolicy",
+    "review"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "manifestId": { "type": "string", "minLength": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "taxonomyVersion": { "type": "string", "minLength": 1 },
+    "labels": {
+      "type": "array",
+      "prefixItems": [
+        { "const": "Safe" },
+        { "const": "Suggestive" },
+        { "const": "Explicit" },
+        { "const": "Explicit Illustration" }
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/entry" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordCount", "sourceGroupCount", "splits", "labels"],
+      "properties": {
+        "recordCount": { "type": "integer", "minimum": 1 },
+        "sourceGroupCount": { "type": "integer", "minimum": 1 },
+        "splits": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/countByName" }
+        },
+        "labels": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/countByName" }
+        }
+      }
+    },
+    "splitPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "sourceGroupIsolation", "splitNames"],
+      "properties": {
+        "strategy": { "type": "string", "minLength": 1 },
+        "sourceGroupIsolation": { "const": true },
+        "splitNames": {
+          "type": "array",
+          "items": { "enum": ["train", "validation", "test", "holdout"] },
+          "minItems": 3,
+          "uniqueItems": true
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["draft", "approved", "rejected"] },
+        "reviewedAt": { "type": "string", "format": "date-time" },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recordId",
+        "sourceGroupId",
+        "split",
+        "label",
+        "provenance",
+        "annotation"
+      ],
+      "properties": {
+        "recordId": { "$ref": "#/$defs/opaqueId" },
+        "sourceGroupId": { "$ref": "#/$defs/opaqueId" },
+        "split": { "enum": ["train", "validation", "test", "holdout"] },
+        "label": {
+          "enum": ["Safe", "Suggestive", "Explicit", "Explicit Illustration"]
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["license", "collection", "contentHash"],
+          "properties": {
+            "license": { "type": "string", "minLength": 1 },
+            "collection": { "type": "string", "minLength": 1 },
+            "contentHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "annotation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": {
+            "status": { "enum": ["pending", "labeled", "excluded"] },
+            "annotatorCount": { "type": "integer", "minimum": 1 },
+            "reviewed": { "type": "boolean" },
+            "exclusionReason": { "type": "string" }
+          }
+        }
+      }
+    },
+    "countByName": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "count"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "opaqueId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{12,128}$"
+    }
+  }
+}
