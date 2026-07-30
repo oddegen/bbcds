@@ -1,6 +1,8 @@
 # Architecture
 
-BBCDS is a browser-only video moderation prototype. This file is the agent-facing source of truth for the target product and technical contract.
+BBCDS is a browser-only video moderation prototype. This file documents the
+stable product target, technical contract, and architecture constraints.
+Mutable implementation status lives in `docs/phase-status.md`.
 
 ## Product Target
 
@@ -17,11 +19,13 @@ The service should return:
 
 The selected model scope is visual sexual content represented by the four-class taxonomy: `Safe`, `Suggestive`, `Explicit`, and `Explicit Illustration`. Gore, general violence, self-harm, drugs, hate symbols, unsafe text, and audio moderation are out of scope unless a future ADR changes the model or policy.
 
-## Current Implementation Status
+## Status Tracking
 
-The repository is currently at Phase 0: application foundation, documentation, checks, and CI. The video-detection pipeline is not implemented yet.
+Current implementation status is tracked in `docs/phase-status.md`.
 
-Do not assume model loading, video scanning, worker inference, adaptive sampling, playback restriction, benchmark collection, or direct CORS URL mode exists until the matching product phase is implemented and tested.
+Do not assume model loading, video scanning, worker inference, adaptive
+sampling, playback restriction, benchmark collection, or direct CORS URL mode
+exists until the matching product phase is marked complete there and has tests.
 
 ## Accepted Baseline
 

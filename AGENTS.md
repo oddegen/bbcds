@@ -1,5 +1,19 @@
 # AGENTS.md
 
+## Agent Quickstart
+
+- Read `docs/phase-status.md` before making implementation-status assumptions.
+- Install dependencies with `pnpm install`.
+- Run the app with `pnpm dev`.
+- Use `pnpm check` as the primary handoff validation.
+- Use `pnpm test:e2e` for the default Chromium browser smoke test. Run `pnpm exec playwright install chromium` first if Chromium is missing.
+- Use `pnpm test:e2e:full` only when all Playwright browsers are installed with `pnpm exec playwright install`.
+- Edit the UI shell in `src/App.tsx` and `src/index.css`.
+- Add unit tests beside source files as `src/*.test.tsx`.
+- Add browser tests in `tests/e2e`.
+- Keep model contracts in `model`.
+- Record accepted architecture decisions in `docs/adr` and testing strategy in `docs/testing.md`.
+
 ## Ground Rules
 
 - Use official setup, install, and generation commands where available.
