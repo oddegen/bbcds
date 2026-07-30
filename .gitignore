@@ -18,12 +18,6 @@ test-results
 *.local
 
 # Model development artifacts
-ml/.venv/
-ml/.pytest_cache/
-ml/runs/
-ml/outputs/
-ml/checkpoints/
-ml/data/
 model/artifacts/
 model/benchmarks/
 model/checkpoints/
