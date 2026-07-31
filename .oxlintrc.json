@@ -1,5 +1,17 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": [
+    "model/.mypy_cache",
+    "model/.pytest_cache",
+    "model/.ruff_cache",
+    "model/.venv",
+    "model/artifacts",
+    "model/benchmarks",
+    "model/checkpoints",
+    "model/datasets",
+    "model/reports",
+    "model/runs"
+  ],
   "plugins": ["react", "typescript", "oxc"],
   "rules": {
     "react/rules-of-hooks": "error",

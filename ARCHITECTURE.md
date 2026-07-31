@@ -2,7 +2,7 @@
 
 BBCDS is a browser-only video moderation prototype. This file documents the
 stable product target, technical contract, and architecture constraints.
-Mutable implementation status lives in `docs/phase-status.md`.
+Mutable implementation status lives in `docs/implementation-status.md`.
 
 ## Product Target
 
@@ -21,17 +21,17 @@ The selected model scope is visual sexual content represented by the four-class 
 
 ## Status Tracking
 
-Current implementation status is tracked in `docs/phase-status.md`.
+Current implementation status is tracked in `docs/implementation-status.md`.
 
 Do not assume model loading, video scanning, worker inference, adaptive
 sampling, playback restriction, benchmark collection, or direct CORS URL mode
-exists until the matching product phase is marked complete there and has tests.
+exists until the matching product milestone is marked complete there and has tests.
 
 ## Accepted Baseline
 
 - Single repository with a Vite React TypeScript app and isolated model contract/tooling area.
 - Static deployment; no application backend.
-- Browser-only inference in the future product phase.
+- Browser-only inference in the future product work.
 - Project-owned MobileNetV3-Small, 224 by 224 input, when model work begins.
 - Quantized `.tflite` artifact with float32 input/output boundaries.
 - LiteRT.js runtime with WASM baseline, measured WebGPU acceleration, and WebNN as experimental only.
@@ -76,12 +76,22 @@ ESLint boundaries should enforce these rules once feature folders exist.
 
 ## Roadmap
 
-- Phase 0: repository foundation and model contract scaffold. Exit gate: `pnpm check` succeeds and docs/CI/agent guardrails are present.
-- Phase 1: model baseline. Exit gate: protected training process produces model/data cards and approved validation evidence.
-- Phase 2: `.tflite` release artifact. Exit gate: quantized artifact passes label, preprocessing, parity, checksum, and LiteRT compatibility gates.
-- Phase 3: file scan MVP. Exit gate: a local benign video returns the public result shape without any inference network request.
-- Phase 4: robust worker lifecycle. Exit gate: cancel/restart tests pass and late worker responses are ignored by scan/request ID.
-- Phase 5: adaptive sampling. Exit gate: deterministic unit tests cover anchors, coverage, dedupe, refinement, caps, and early-exit rules.
-- Phase 6: restriction UX and direct CORS URL mode. Exit gate: unsafe mock results pause/mute/cover playback and CORS success/failure paths pass without a proxy.
-- Phase 7: performance hardening. Exit gate: benchmark reports include accelerator, device/browser metadata, video properties, sample counts, timings, long tasks, and bundle/model budgets.
-- Phase 8: evaluation and submission. Exit gate: known limitations, threshold evidence, benchmark methodology, and deliverables map to tested code or measured reports.
+- Foundation: repository scaffold, model contract, docs, CI, and agent guardrails.
+  Exit gate: `pnpm check` succeeds.
+- Model baseline: protected training process produces model/data cards and
+  approved validation evidence.
+- Model artifact: quantized `.tflite` release passes label, preprocessing,
+  parity, checksum, and LiteRT compatibility gates.
+- File scan MVP: a local benign video returns the public result shape without
+  any inference network request.
+- Worker lifecycle: cancel/restart tests pass and late worker responses are
+  ignored by scan/request ID.
+- Adaptive sampling: deterministic unit tests cover anchors, coverage, dedupe,
+  refinement, caps, and early-exit rules.
+- Restriction UX and direct CORS URL mode: unsafe mock results pause/mute/cover
+  playback and CORS success/failure paths pass without a proxy.
+- Performance hardening: benchmark reports include accelerator, device/browser
+  metadata, video properties, sample counts, timings, long tasks, and
+  bundle/model budgets.
+- Evaluation and submission: known limitations, threshold evidence, benchmark
+  methodology, and deliverables map to tested code or measured reports.

@@ -1,0 +1,5 @@
+path,label,source_id,split,media_type,license,sha256
+relative/path/to/safe-image.png,Safe,source-000000000001,train,image,internal-or-licensed,0000000000000000000000000000000000000000000000000000000000000000
+relative/path/to/suggestive-image.png,Suggestive,source-000000000002,validation,image,internal-or-licensed,0000000000000000000000000000000000000000000000000000000000000000
+relative/path/to/explicit-image.png,Explicit,source-000000000003,test,image,internal-or-licensed,0000000000000000000000000000000000000000000000000000000000000000
+relative/path/to/explicit-illustration.png,Explicit Illustration,source-000000000004,holdout,image,internal-or-licensed,0000000000000000000000000000000000000000000000000000000000000000

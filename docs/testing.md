@@ -6,7 +6,7 @@
 - Playwright verifies the app loads and has no obvious accessibility violations.
 - `check:bundle` verifies the built app stays under the initial JS budget.
 
-## Future Product Phase
+## Future Product Work
 
 Add deterministic tests for sampling, aggregation, worker stale-response handling, cancellation, accelerator fallback, network privacy assertions, and resource cleanup.
 

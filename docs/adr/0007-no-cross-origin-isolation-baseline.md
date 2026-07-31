@@ -1,5 +1,5 @@
 # ADR 0007: No Cross-Origin Isolation Baseline
 
-Status: Accepted for future product phase.
+Status: Accepted for future product work.
 
 Do not require COOP/COEP in the baseline. Revisit only with measured need and compatibility review.

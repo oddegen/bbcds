@@ -8,7 +8,11 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-.agents
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/bbcds-model-training/
+!.agents/skills/bbcds-model-training/SKILL.md
 .codex
 dist
 dist-ssr
@@ -18,11 +22,19 @@ test-results
 *.local
 
 # Model development artifacts
+model/**/__pycache__/
+model/.mypy_cache/
+model/.pytest_cache/
+model/.ruff_cache/
+model/.venv/
 model/artifacts/
 model/benchmarks/
 model/checkpoints/
 model/datasets/
+model/runs/
+model/reports/*.json
 model/reports/protected/
+model/**/*.keras
 public/models/
 model/**/*.tflite
 

@@ -9,7 +9,7 @@ BBCDS is designed to accept a local video file or direct CORS-enabled video URL,
 sample frames under bounded browser budgets, classify selected frames locally,
 aggregate risk, and restrict playback when policy thresholds are crossed.
 
-Implementation status is tracked in `docs/phase-status.md`. Architecture and
+Implementation status is tracked in `docs/implementation-status.md`. Architecture and
 accepted product decisions are documented in `ARCHITECTURE.md` and `docs/adr`.
 
 The implementation must remain browser-only: no server-side video processing,
@@ -68,7 +68,7 @@ pnpm test:e2e:full
 - `model`: model contract, canonical labels, and manifest schemas.
 - `docs/adr`: accepted architecture decision records.
 - `docs/testing.md`: testing strategy and fixture policy.
-- `docs/phase-status.md`: mutable phase status.
+- `docs/implementation-status.md`: mutable implementation status.
 - `AGENTS.md`: agent operating rules and required checks.
 
 ## Architecture
@@ -78,7 +78,7 @@ Accepted product decisions live in `docs/adr`.
 
 Additional documentation:
 
-- `docs/phase-status.md`: current phase status.
+- `docs/implementation-status.md`: current implementation status.
 - `docs/testing.md`: testing strategy and fixture policy.
 - `docs/benchmarking.md`: benchmark methodology and report requirements.
 - `docs/model-card.md`: model scope and limitations.

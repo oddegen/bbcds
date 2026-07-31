@@ -2,7 +2,7 @@
 
 ## Agent Quickstart
 
-- Read `docs/phase-status.md` before making implementation-status assumptions.
+- Read `docs/implementation-status.md` before making implementation-status assumptions.
 - Install dependencies with `pnpm install`.
 - Run the app with `pnpm dev`.
 - Use `pnpm check` as the primary handoff validation.
