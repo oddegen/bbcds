@@ -76,6 +76,41 @@ Before finishing code changes, run the most targeted check plus:
 
 Run `pnpm check` before broader handoff when practical.
 
+## Test Authoring
+
+- Before writing a test, search the existing suite and identify the behavior,
+  risk, and test layer already covering the area. Extend the closest test when
+  that keeps the failure focused.
+- Add a test when a behavior, contract, security boundary, or prior defect is
+  likely to regress. Do not add tests only to increase coverage or mirror the
+  source tree.
+- Test through the narrowest stable public boundary that proves the behavior.
+  Prefer unit tests for pure logic, integration tests for owned boundaries, and
+  browser tests for critical user flows.
+- Assert observable outcomes and invariants, not private calls, source text,
+  exact markup structure, generated file ordering, or incidental counts.
+- A defect fix should include a regression test that fails without the fix when
+  practical.
+- Keep tests deterministic and hermetic. Seed randomness, use temporary
+  directories, control time, and do not depend on test order, external
+  networks, shared accounts, or machine-specific state.
+- Use real production code with the smallest realistic fixture. Mock only
+  external or expensive boundaries; do not mock the behavior under test.
+- Avoid duplicate coverage. Extend or parameterize the closest existing test,
+  and share setup only after genuine repetition appears.
+- Keep one clear reason for failure per test. Prefer focused assertions over
+  broad snapshots. Use tolerances for floating-point and timing-sensitive
+  values.
+- Do not test static schemas, configuration text, or generated artifacts when
+  an executable path already validates the same contract. Artifact tests are
+  justified for security, compatibility, or release gates that runtime tests
+  cannot cover.
+- After adding stronger coverage, remove tests that became redundant or
+  implementation-coupled. Do not retain both versions for reassurance.
+- Run the targeted test first, then the required repository checks. Document
+  any check that cannot run and why. In the handoff, state the behavior and risk
+  covered rather than only reporting the test count.
+
 ## Future Product Invariants
 
 - One frame/classification in flight.

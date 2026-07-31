@@ -8,6 +8,9 @@ information.
 
 - Foundation: complete. Repository foundation, model contract scaffold, docs,
   checks, CI, and agent guardrails are present.
+- Model training workflow: ready. Protected manifest preparation, resumable
+  Keras training, aggregate evidence generation, and the Colab runbook are
+  implemented and tested.
 - Model baseline: pending. No trained baseline model exists yet.
 - Model artifact and later product work: pending.
 

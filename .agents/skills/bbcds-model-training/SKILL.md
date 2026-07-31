@@ -32,5 +32,25 @@ limitations.
   variants in repo contracts.
 - Validate source-group split isolation before training.
 - Keep preprocessing contract RGB, letterboxed `224x224`, float32 `[0,255]`.
-- Add tests only for contracts likely to regress: labels, manifest validation,
-  leakage, metrics, and schema-compatible reports.
+
+## Model Test Rules
+
+- Apply the repository-wide rules in `AGENTS.md` and `docs/testing.md`; the
+  items below are model-specific additions.
+- Test contracts likely to regress: canonical labels, preprocessing, manifest
+  validation, source isolation, deduplication, metrics, checkpoint recovery,
+  evidence privacy, and executable report validation.
+- Use small synthetic, benign fixtures. Never add protected examples, model
+  weights, source metadata, or realistic harmful-content fixtures.
+- Seed Python, NumPy, and TensorFlow randomness used by a test. Do not require a
+  GPU, download pretrained weights, call remote datasets, or depend on a
+  previous test.
+- Exercise the real loader, validator, or training boundary where affordable.
+  Replace only the expensive model or remote boundary with a minimal fake.
+- Assert exact values for deterministic policy logic and schema fields. Use
+  explicit tolerances for floating-point parity and metrics.
+- Do not duplicate schema-only tests when an evidence-writing integration test
+  already validates the generated report against that schema.
+- Keep full training, dataset downloads, browser compatibility, and device
+  benchmarks out of pull-request tests. Validate those in the protected release
+  workflow and retain aggregate evidence.

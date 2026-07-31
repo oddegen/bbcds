@@ -6,53 +6,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from bbcds_model.constants import LABELS
 from bbcds_model.train import write_baseline_evidence
-from bbcds_model.validation_report import (
-    build_baseline_validation_report,
-    protected_reference,
-    validate_baseline_report,
-)
-
-
-def test_build_baseline_validation_report_matches_schema() -> None:
-    metrics = {
-        "macroF1": 0.75,
-        "perClass": [
-            {
-                "label": label,
-                "support": 10,
-                "precision": 0.75,
-                "recall": 0.75,
-                "f1": 0.75,
-            }
-            for label in LABELS
-        ],
-    }
-    reference = protected_reference(
-        kind="protected-file",
-        uri="protected://example",
-        sha256="a" * 64,
-    )
-
-    report = build_baseline_validation_report(
-        report_id="baseline-v1",
-        training_commit="abcdef0",
-        dataset_manifest_hash="b" * 64,
-        checkpoint_reference=reference,
-        confusion_matrix_reference=reference,
-        split_name="holdout",
-        split_record_count=40,
-        split_source_group_count=40,
-        metrics=metrics,
-        limitations=["Synthetic unit-test metrics only."],
-        threshold_rationale="Unit-test threshold rationale.",
-    )
-
-    validate_baseline_report(
-        report,
-        schema_path=Path(__file__).parents[1] / "baseline-validation.schema.json",
-    )
+from bbcds_model.validation_report import validate_baseline_report
 
 
 def test_write_baseline_evidence_writes_schema_valid_draft(

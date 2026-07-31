@@ -17,24 +17,33 @@ Set up the Python environment from this directory:
 uv sync
 ```
 
-For a clean rebuild:
-
-```sh
-rm -rf .venv
-uv sync --python 3.11
-```
-
 Run ML checks:
 
 ```sh
 make check
 ```
 
-Run a protected training job:
+Prepare the gated research dataset after it has been downloaded and extracted:
 
 ```sh
-make train MANIFEST=/path/to/protected/dataset.csv
+uv run python -m bbcds_model.prepare_manifest \
+  --dataset-root /content/bbcds-data/nsfw_dataset_v1 \
+  --output /content/bbcds-data/dataset.csv \
+  --profile deepghs-nsfw-detect \
+  --seed 20260731
 ```
+
+Run or recover a protected training job:
+
+```sh
+uv run python -m bbcds_model.train \
+  --manifest /path/to/protected/dataset.csv \
+  --resume
+```
+
+For a computer without a suitable GPU, use
+[`notebooks/train-colab.ipynb`](notebooks/train-colab.ipynb) and follow the
+[model training guide](../docs/model-training.md).
 
 The training command records the current Git commit in the protected validation
 report. If the command runs outside a Git checkout, pass
@@ -55,6 +64,12 @@ Required columns are:
 Relative paths are resolved from the manifest file's directory. The loader
 verifies file existence, SHA-256 hashes, canonical labels, required splits, and
 source-group isolation before training.
+
+The `deepghs-nsfw-detect` preparation profile verifies images with Pillow,
+deduplicates SHA-256 matches, groups perceptual near-duplicates, excludes
+conflicting-label groups, and creates deterministic source-grouped splits. Its
+adjacent audit JSON contains aggregate counts only. Both files are protected
+inputs and must remain outside Git.
 
 Training outputs under `runs`, checkpoints, reports, `.keras`, and `.tflite`
 files are ignored because they may contain protected evidence or model

@@ -8,7 +8,7 @@ import os
 import random
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -28,6 +28,7 @@ from bbcds_model.validation_report import (
 )
 
 DEFAULT_SEED = 20260731
+ResumeStage = Literal["new", "head", "fine-tune"]
 
 
 def set_reproducibility(seed: int) -> None:
@@ -52,9 +53,14 @@ def build_callbacks(
     output_dir: Path,
     *,
     monitor: str = "val_loss",
+    resume: bool = False,
 ) -> list[keras.callbacks.Callback]:
     output_dir.mkdir(parents=True, exist_ok=True)
     return [
+        keras.callbacks.BackupAndRestore(
+            backup_dir=output_dir / "training-state",
+            delete_checkpoint=True,
+        ),
         keras.callbacks.ModelCheckpoint(
             output_dir / "best.keras",
             monitor=monitor,
@@ -62,7 +68,7 @@ def build_callbacks(
         ),
         keras.callbacks.EarlyStopping(monitor=monitor, patience=5, restore_best_weights=True),
         keras.callbacks.ReduceLROnPlateau(monitor=monitor, factor=0.3, patience=2, min_lr=1e-7),
-        keras.callbacks.CSVLogger(output_dir / "training.csv"),
+        keras.callbacks.CSVLogger(output_dir / "training.csv", append=resume),
         keras.callbacks.TensorBoard(log_dir=output_dir / "tensorboard"),
     ]
 
@@ -93,6 +99,44 @@ def collect_predictions(
         probabilities.append(model.predict(images, verbose=0))
 
     return np.concatenate(labels).astype("int32"), np.concatenate(probabilities)
+
+
+def find_backbone(model: keras.Model) -> keras.Model:
+    nested_models = [layer for layer in model.layers if isinstance(layer, keras.Model)]
+    if len(nested_models) != 1:
+        raise RuntimeError("Expected exactly one nested backbone model")
+    return nested_models[0]
+
+
+def restore_training_model(
+    *,
+    output_dir: Path,
+    resume: bool,
+) -> tuple[keras.Model, keras.Model, ResumeStage]:
+    head_model_path = output_dir / "head-final.keras"
+    fine_tune_model_path = output_dir / "fine-tune-final.keras"
+    existing = [path for path in (head_model_path, fine_tune_model_path) if path.exists()]
+
+    if existing and not resume:
+        raise FileExistsError("Training checkpoints exist; pass --resume or choose a new output directory")
+    if resume:
+        checkpoints: tuple[tuple[Path, ResumeStage], ...] = (
+            (fine_tune_model_path, "fine-tune"),
+            (head_model_path, "head"),
+        )
+        for path, stage in checkpoints:
+            if not path.is_file():
+                continue
+            try:
+                model = keras.models.load_model(path)
+                return model, find_backbone(model), stage
+            except (OSError, TypeError, ValueError):
+                continue
+        if existing:
+            raise RuntimeError("No valid completed training checkpoint could be loaded")
+
+    model, backbone = build_classifier()
+    return model, backbone, "new"
 
 
 def write_baseline_evidence(
@@ -173,52 +217,69 @@ def train_baseline(
     fine_tune_epochs: int,
     fine_tune_layers: int,
     training_commit: str,
+    resume: bool = False,
 ) -> dict[str, Any]:
     set_reproducibility(seed)
+    final_model_path = output_dir / "final.keras"
+    metadata_path = output_dir / "run-metadata.json"
+    if resume and final_model_path.is_file() and metadata_path.is_file():
+        try:
+            metadata = dict(json.loads(metadata_path.read_text()))
+            keras.models.load_model(final_model_path)
+            return metadata
+        except (json.JSONDecodeError, OSError, TypeError, ValueError):
+            pass
+
     train_ds, validation_ds, test_ds, manifest = make_all_datasets(
         manifest_path,
         batch_size=batch_size,
         seed=seed,
     )
 
-    model, backbone = build_classifier()
+    model, backbone, restored_stage = restore_training_model(
+        output_dir=output_dir,
+        resume=resume,
+    )
     class_weights = calculate_class_weights(manifest)
 
-    model.compile(
-        optimizer=keras.optimizers.AdamW(learning_rate=3e-4, weight_decay=1e-4),
-        loss=keras.losses.SparseCategoricalCrossentropy(),
-        metrics=[keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
-    )
-    model.fit(
-        train_ds,
-        validation_data=validation_ds,
-        epochs=head_epochs,
-        class_weight=class_weights,
-        callbacks=build_callbacks(output_dir / "head"),
-    )
+    if restored_stage == "new":
+        model.compile(
+            optimizer=keras.optimizers.AdamW(learning_rate=3e-4, weight_decay=1e-4),
+            loss=keras.losses.SparseCategoricalCrossentropy(),
+            metrics=[keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
+        )
+        model.fit(
+            train_ds,
+            validation_data=validation_ds,
+            epochs=head_epochs,
+            class_weight=class_weights,
+            callbacks=build_callbacks(output_dir / "head", resume=resume),
+        )
+        model.save(output_dir / "head-final.keras")
 
-    backbone.trainable = True
-    fine_tune_from = max(0, len(backbone.layers) - fine_tune_layers)
-    for index, layer in enumerate(backbone.layers):
-        layer.trainable = index >= fine_tune_from
-        if isinstance(layer, keras.layers.BatchNormalization):
-            layer.trainable = False
+    if restored_stage != "fine-tune":
+        backbone.trainable = True
+        fine_tune_from = max(0, len(backbone.layers) - fine_tune_layers)
+        for index, layer in enumerate(backbone.layers):
+            layer.trainable = index >= fine_tune_from
+            if isinstance(layer, keras.layers.BatchNormalization):
+                layer.trainable = False
 
-    model.compile(
-        optimizer=keras.optimizers.AdamW(learning_rate=1e-5, weight_decay=1e-5),
-        loss=keras.losses.SparseCategoricalCrossentropy(),
-        metrics=[keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
-    )
-    model.fit(
-        train_ds,
-        validation_data=validation_ds,
-        epochs=fine_tune_epochs,
-        class_weight=class_weights,
-        callbacks=build_callbacks(output_dir / "fine-tune"),
-    )
+        model.compile(
+            optimizer=keras.optimizers.AdamW(learning_rate=1e-5, weight_decay=1e-5),
+            loss=keras.losses.SparseCategoricalCrossentropy(),
+            metrics=[keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
+        )
+        model.fit(
+            train_ds,
+            validation_data=validation_ds,
+            epochs=fine_tune_epochs,
+            class_weight=class_weights,
+            callbacks=build_callbacks(output_dir / "fine-tune", resume=resume),
+        )
+        model.save(output_dir / "fine-tune-final.keras")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    final_model_path = output_dir / "final.keras"
     model.save(final_model_path)
     test_metrics = model.evaluate(test_ds, return_dict=True)
     evidence = write_baseline_evidence(
@@ -237,6 +298,8 @@ def train_baseline(
         "headEpochs": head_epochs,
         "fineTuneEpochs": fine_tune_epochs,
         "fineTuneLayers": fine_tune_layers,
+        "resumeRequested": resume,
+        "restoredStage": restored_stage,
         "labels": list(LABELS),
         "classWeights": class_weights,
         "finalModelPath": str(final_model_path),
@@ -262,6 +325,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fine-tune-epochs", type=int, default=20)
     parser.add_argument("--fine-tune-layers", type=int, default=30)
     parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume from durable checkpoints in the output directory",
+    )
+    parser.add_argument(
         "--training-commit",
         default=None,
         help="Git commit recorded in the protected validation report",
@@ -280,4 +348,5 @@ def main() -> None:
         fine_tune_epochs=args.fine_tune_epochs,
         fine_tune_layers=args.fine_tune_layers,
         training_commit=args.training_commit or resolve_training_commit(Path(__file__).parents[3]),
+        resume=args.resume,
     )
