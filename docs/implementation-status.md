@@ -16,6 +16,12 @@ Produce a quantized `.tflite` artifact and retain checksums, preprocessing and
 label contracts, Keras/TFLite parity, LiteRT.js compatibility, and benchmark
 evidence. The current `0.43` threshold remains exploratory.
 
+The protected conversion, parity, Chromium/WASM compatibility, benchmark, and
+approval tooling is implemented. The real release remains pending because the
+hash-pinned dataset snapshot must be reacquired for representative calibration
+and full-validation parity. Do not mark the artifact complete until the
+protected manifest is approved.
+
 ## Not Implemented
 
 Model loading, browser inference, workers, video scanning, adaptive sampling,

@@ -118,6 +118,11 @@ dependencies = [
     { name = "pillow" },
     { name = "pyyaml" },
     { name = "scikit-learn" },
+    { name = "tensorflow" },
+]
+
+[package.optional-dependencies]
+gpu = [
     { name = "tensorflow", extra = ["and-cuda"] },
 ]
 
@@ -138,8 +143,10 @@ requires-dist = [
     { name = "pillow", specifier = ">=10.4.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "scikit-learn", specifier = ">=1.5.1" },
-    { name = "tensorflow", extras = ["and-cuda"], specifier = ">=2.16.1,<2.17" },
+    { name = "tensorflow", specifier = ">=2.16.1,<2.17" },
+    { name = "tensorflow", extras = ["and-cuda"], marker = "extra == 'gpu'", specifier = ">=2.16.1,<2.17" },
 ]
+provides-extras = ["gpu"]
 
 [package.metadata.requires-dev]
 dev = [

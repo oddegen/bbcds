@@ -20,6 +20,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.8.0(supports-color@7.2.0))
+      '@litertjs/core':
+        specifier: 2.5.3
+        version: 2.5.3
       '@playwright/test':
         specifier: ^1.62.0
         version: 1.62.0
@@ -494,6 +497,18 @@ packages:
     resolution:
       {
         integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==,
+      }
+
+  '@litertjs/core@2.5.3':
+    resolution:
+      {
+        integrity: sha512-PlGmbMOq9WitX7FO0jhbdJw9GthatsyuCQXjTt/wJZo0FLaw48q4tz8IwqgqCIkviYGr9OFDL1kCnN4nzWoyJQ==,
+      }
+
+  '@litertjs/wasm-utils@2.5.3':
+    resolution:
+      {
+        integrity: sha512-4fJiw6tBQnIs+0jH/OQ16nYOiSl8/+zZnn5h2ul8aTKHi05sVqZW580Tmk78pC2kT39A9OYBVdFawteZ/sI1kQ==,
       }
 
   '@napi-rs/wasm-runtime@1.2.0':
@@ -3290,6 +3305,12 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@litertjs/core@2.5.3':
+    dependencies:
+      '@litertjs/wasm-utils': 2.5.3
+
+  '@litertjs/wasm-utils@2.5.3': {}
 
   '@napi-rs/wasm-runtime@1.2.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:

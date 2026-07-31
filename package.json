@@ -23,6 +23,8 @@
     "test:e2e:full": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:performance": "playwright test --project performance",
+    "model:compat": "node scripts/run-model-compat.mjs",
+    "clean": "node scripts/clean.mjs",
     "check:bundle": "node scripts/check-bundle-budget.mjs",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build && pnpm check:bundle",
     "prepare": "husky"
@@ -36,6 +38,7 @@
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
+    "@litertjs/core": "2.5.3",
     "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.0",

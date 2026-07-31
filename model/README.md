@@ -7,7 +7,7 @@ bundled. Protected data, manifests, reports, logs, checkpoints, `.keras`, and
 ## Setup and Checks
 
 ```sh
-uv sync
+uv sync --frozen
 make check
 ```
 
@@ -63,8 +63,46 @@ report with owner-only permissions (`0600`).
 - `dataset-manifest.schema.json`: protected training-manifest shape.
 - `baseline-validation.schema.json`: validation and approval report.
 - `baseline-v1-policy.json`: pinned hashes and gates for this release.
-- `manifest.schema.json`: future TFLite release manifest.
+- `baseline-v1-artifact-policy.json`: pinned conversion, parity, and runtime gates.
+- `manifest.schema.json`: approved TFLite artifact manifest.
 
-The next milestone is a quantized MobileNetV3-Small TFLite artifact with label,
-preprocessing, checksum, parity, LiteRT.js compatibility, and benchmark
-evidence.
+## Export And Approve An Artifact
+
+The release tooling is implemented, but no artifact is approved or bundled.
+Run conversion in Colab so the gated dataset remains ephemeral and the full
+validation split is available:
+
+```sh
+uv run python -m bbcds_model.export_artifact \
+  --policy baseline-v1-artifact-policy.json \
+  --approved-baseline-report /durable/protected/baseline-validation-approved.json \
+  --checkpoint /durable/protected/final.keras \
+  --manifest /path/to/protected/dataset.csv \
+  --output-directory /durable/protected/artifact-release-1.0.0
+```
+
+After transferring the artifact to durable protected local storage, run the
+real Chromium/WASM check from the repository root:
+
+```sh
+pnpm model:compat -- \
+  --policy model/baseline-v1-artifact-policy.json \
+  --artifact /durable/protected/bbcds-mobilenetv3-small-1.0.0.tflite \
+  --output /durable/protected/litert-compatibility.json
+```
+
+Approve only the exact artifact covered by both reports:
+
+```sh
+uv run python -m bbcds_model.finalize_artifact \
+  --policy baseline-v1-artifact-policy.json \
+  --artifact /durable/protected/bbcds-mobilenetv3-small-1.0.0.tflite \
+  --conversion-report /durable/protected/artifact-conversion-parity.json \
+  --compatibility-report /durable/protected/litert-compatibility.json \
+  --approved-baseline-report /durable/protected/baseline-validation-approved.json \
+  --approver project-owner \
+  --output /durable/protected/model-manifest-approved.json
+```
+
+All outputs must be new paths outside the Git worktree and system temporary
+storage. Commands print aggregate evidence only and refuse to overwrite output.

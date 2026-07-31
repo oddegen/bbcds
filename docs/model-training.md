@@ -105,7 +105,14 @@ If training reports GPU memory exhaustion, change `--batch-size` from `64` to
 
 ## Current Boundary
 
-This tooling stops at Keras training and protected validation evidence. TFLite
-export, post-training quantization, metadata embedding, LiteRT.js compatibility
-testing, browser inference, and video sampling are outside this workflow unless
-an ADR changes the roadmap.
+The notebook can now export the hash-pinned `baseline-v1` checkpoint after
+reacquiring and validating the protected dataset snapshot. Before running the
+artifact cell, place the approved baseline report in the private Drive output
+folder under the exact name documented by the cell. The exporter performs
+integer-internal quantization with float32 boundaries and full-validation
+Keras/TFLite parity.
+
+Download only the resulting `.tflite` artifact and aggregate conversion report
+to durable protected local storage. The Chromium/WASM and approval commands are
+owned by [`model/README.md`](../model/README.md). Browser inference, workers,
+video sampling, and playback restriction remain outside this workflow.

@@ -1,60 +1,137 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://bbcds.local/model-manifest.schema.json",
-  "title": "BBCDS Model Manifest",
+  "title": "BBCDS Approved Model Artifact Manifest",
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "schemaVersion",
+    "releaseId",
     "modelId",
     "semanticVersion",
-    "sha256",
+    "artifact",
     "trainingCommit",
     "datasetManifestHash",
     "labels",
-    "inputShape",
-    "inputDType",
-    "inputRange",
+    "input",
+    "output",
     "quantizationMode",
     "thresholdsVersion",
-    "minimumRuntimeVersion"
+    "runtime",
+    "evidence",
+    "approval"
   ],
   "properties": {
+    "schemaVersion": { "const": 1 },
+    "releaseId": { "type": "string", "minLength": 1 },
     "modelId": { "type": "string", "minLength": 1 },
-    "semanticVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
-    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semanticVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "sizeBytes"],
+      "properties": {
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "sizeBytes": { "type": "integer", "minimum": 1 }
+      }
+    },
     "trainingCommit": { "type": "string", "minLength": 7 },
-    "datasetManifestHash": { "type": "string", "minLength": 1 },
+    "datasetManifestHash": { "$ref": "#/$defs/sha256" },
     "labels": {
       "type": "array",
-      "prefixItems": [
-        { "const": "Safe" },
-        { "const": "Suggestive" },
-        { "const": "Explicit" },
-        { "const": "Explicit Illustration" }
-      ],
-      "minItems": 4,
-      "maxItems": 4
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
     },
-    "inputShape": {
-      "type": "array",
-      "prefixItems": [
-        { "const": 1 },
-        { "const": 224 },
-        { "const": 224 },
-        { "const": 3 }
-      ],
-      "minItems": 4,
-      "maxItems": 4
-    },
-    "inputDType": { "const": "float32" },
-    "inputRange": {
-      "type": "array",
-      "prefixItems": [{ "const": 0 }, { "const": 255 }],
-      "minItems": 2,
-      "maxItems": 2
-    },
+    "input": { "$ref": "#/$defs/inputContract" },
+    "output": { "$ref": "#/$defs/outputContract" },
     "quantizationMode": { "type": "string", "minLength": 1 },
     "thresholdsVersion": { "type": "string", "minLength": 1 },
-    "minimumRuntimeVersion": { "type": "string", "minLength": 1 }
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package", "minimumVersion", "accelerator"],
+      "properties": {
+        "package": { "type": "string", "minLength": 1 },
+        "minimumVersion": { "type": "string", "minLength": 1 },
+        "accelerator": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approvedBaselineReportHash",
+        "conversionReportHash",
+        "compatibilityReportHash"
+      ],
+      "properties": {
+        "approvedBaselineReportHash": { "$ref": "#/$defs/sha256" },
+        "conversionReportHash": { "$ref": "#/$defs/sha256" },
+        "compatibilityReportHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "approvedAt", "approver"],
+      "properties": {
+        "status": { "const": "approved" },
+        "approvedAt": { "type": "string", "format": "date-time" },
+        "approver": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "inputContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "shape",
+        "dtype",
+        "range",
+        "colorSpace",
+        "layout",
+        "resize",
+        "modelPreprocessing"
+      ],
+      "properties": {
+        "shape": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 },
+          "minItems": 1
+        },
+        "dtype": { "type": "string", "minLength": 1 },
+        "range": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "colorSpace": { "type": "string", "minLength": 1 },
+        "layout": { "type": "string", "minLength": 1 },
+        "resize": { "type": "string", "minLength": 1 },
+        "modelPreprocessing": { "type": "string", "minLength": 1 }
+      }
+    },
+    "outputContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shape", "dtype", "semantics"],
+      "properties": {
+        "shape": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 },
+          "minItems": 1
+        },
+        "dtype": { "type": "string", "minLength": 1 },
+        "semantics": { "type": "string", "minLength": 1 }
+      }
+    }
   }
 }

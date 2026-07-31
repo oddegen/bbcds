@@ -20,7 +20,8 @@
 - Model family: project-owned MobileNetV3-Small initialized from ImageNet weights.
 - Input contract: RGB, NHWC, `1 x 224 x 224 x 3`, float32 values in `[0,255]`.
 - Runtime target: browser-only LiteRT.js in a dedicated worker.
-- Release artifact: none. TFLite conversion and compatibility are the next milestone.
+- Release artifact: none approved. Current milestone truth is maintained in
+  [`implementation-status.md`](implementation-status.md).
 
 ## Uses
 
@@ -133,5 +134,6 @@ and browser benchmarks before any product claim.
 - Deprecation: supersede this baseline when a fully evidenced replacement is approved.
 - Rollback artifact: protected Keras checkpoint identified by the hash above.
 
-A later `.tflite` release requires quantization, checksums, preprocessing and
-label contracts, Keras/TFLite parity, LiteRT.js compatibility, and benchmark evidence.
+Artifact approval and implementation status are tracked in
+[`implementation-status.md`](implementation-status.md); executable release
+commands are owned by [`model/README.md`](../model/README.md).

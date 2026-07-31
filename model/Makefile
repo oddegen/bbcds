@@ -1,7 +1,10 @@
-.PHONY: sync lint typecheck test check train
+.PHONY: sync sync-gpu lint typecheck test check clean train
 
 sync:
-	uv sync --python 3.11
+	uv sync --frozen --python 3.11
+
+sync-gpu:
+	uv sync --frozen --python 3.11 --extra gpu
 
 lint:
 	uv run ruff check .
@@ -13,6 +16,9 @@ test:
 	uv run pytest
 
 check: lint typecheck test
+
+clean:
+	node ../scripts/clean.mjs
 
 train:
 	uv run python -m bbcds_model.train --manifest "$(MANIFEST)"

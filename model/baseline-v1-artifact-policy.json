@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "releaseId": "baseline-v1",
+  "modelId": "bbcds-mobilenetv3-small",
+  "semanticVersion": "1.0.0",
+  "trainingCommit": "0b92626ea18e",
+  "datasetManifestHash": "46c18a29ac0436b6b7dfe72e9919cc6ad49fd29309bbe5bc3851b2ad3e122e95",
+  "checkpointHash": "eaa36900095460cf8c1ccb78c968381277d61279cc69583d42e31d676fab2692",
+  "approvedBaselineReportHash": "d7abe560e12346ce967e0ab70d488a55f31ebe1ded7d5f0e99a1b47176418d16",
+  "labels": ["Safe", "Suggestive", "Explicit", "Explicit Illustration"],
+  "input": {
+    "shape": [1, 224, 224, 3],
+    "dtype": "float32",
+    "range": [0, 255],
+    "colorSpace": "RGB",
+    "layout": "NHWC",
+    "resize": "aspect-preserving-letterbox",
+    "modelPreprocessing": "MobileNetV3"
+  },
+  "output": {
+    "shape": [1, 4],
+    "dtype": "float32",
+    "semantics": "probabilities"
+  },
+  "quantization": {
+    "mode": "int8-internal-float32-boundary",
+    "representativeSplit": "train",
+    "representativeSampleCount": 512,
+    "samplesPerLabel": 128,
+    "uniqueSourceGroups": true,
+    "seed": 20260731
+  },
+  "parity": {
+    "split": "validation",
+    "threshold": 0.43,
+    "minimumTop1Agreement": 0.98,
+    "maximumMacroF1Drop": 0.01,
+    "maximumBinaryPrecisionDrop": 0.01,
+    "maximumBinaryRecallDrop": 0.01
+  },
+  "runtime": {
+    "package": "@litertjs/core",
+    "version": "2.5.3",
+    "accelerator": "wasm",
+    "browser": "chromium",
+    "warmupIterations": 10,
+    "measuredIterations": 50
+  },
+  "thresholdsVersion": "baseline-v1-exploratory"
+}

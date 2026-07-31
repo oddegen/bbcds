@@ -1,0 +1,9 @@
+* @oddegen
+
+/.github/ @oddegen
+/ARCHITECTURE.md @oddegen
+/docs/adr/ @oddegen
+/model/ @oddegen
+/scripts/run-model-compat.mjs @oddegen
+/scripts/model-compat-runner.mjs @oddegen
+/tests/model-compat/ @oddegen

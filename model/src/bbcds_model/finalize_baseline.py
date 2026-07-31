@@ -6,8 +6,6 @@ import argparse
 import copy
 import json
 import math
-import os
-import tempfile
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
@@ -17,7 +15,16 @@ import pandas as pd
 from jsonschema import ValidationError
 
 from bbcds_model.constants import LABELS, REQUIRED_TRAINING_SPLITS
-from bbcds_model.manifest import load_training_manifest, sha256_file
+from bbcds_model.manifest import load_training_manifest
+from bbcds_model.protected_io import (
+    ProtectedEvidenceError,
+    read_json_object,
+    validate_new_protected_path,
+    write_private_json,
+)
+from bbcds_model.protected_io import (
+    sha256_file as protected_sha256_file,
+)
 from bbcds_model.validation_report import validate_baseline_report
 
 APPROVAL_NOTE = (
@@ -27,25 +34,11 @@ APPROVAL_NOTE = (
 )
 
 
-class FinalizationError(ValueError):
-    """Raised when protected baseline evidence cannot be approved safely."""
-
-
-def _read_json_object(path: Path, *, description: str) -> dict[str, Any]:
-    try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as error:
-        raise FinalizationError(f"Could not read {description}") from error
-    if not isinstance(value, dict):
-        raise FinalizationError(f"{description.capitalize()} must be a JSON object")
-    return value
+FinalizationError = ProtectedEvidenceError
 
 
 def _sha256(path: Path, *, description: str) -> str:
-    try:
-        return sha256_file(path)
-    except OSError as error:
-        raise FinalizationError(f"Could not read {description}") from error
+    return protected_sha256_file(path, description=description)
 
 
 def _require_equal(actual: object, expected: object, *, description: str) -> None:
@@ -275,10 +268,10 @@ def finalize_baseline(
     if not approver.strip():
         raise FinalizationError("Approver must not be empty")
 
-    policy = _read_json_object(policy_path, description="release policy")
-    audit = _read_json_object(audit_path, description="dataset audit")
-    draft = _read_json_object(draft_path, description="baseline validation draft")
-    confusion = _read_json_object(
+    policy = read_json_object(policy_path, description="release policy")
+    audit = read_json_object(audit_path, description="dataset audit")
+    draft = read_json_object(draft_path, description="baseline validation draft")
+    confusion = read_json_object(
         confusion_matrix_path, description="confusion-matrix evidence"
     )
     try:
@@ -361,30 +354,15 @@ def validate_protected_output_path(
     repository_root: Path,
     temporary_root: Path | None = None,
 ) -> None:
-    resolved = output_path.resolve()
-    if not resolved.parent.is_dir():
-        raise FinalizationError("Protected output directory does not exist")
-    if resolved.is_relative_to(repository_root.resolve()):
-        raise FinalizationError("Protected output must be outside the Git worktree")
-    temp_root = (temporary_root or Path(tempfile.gettempdir())).resolve()
-    if resolved.is_relative_to(temp_root):
-        raise FinalizationError("Protected output must not use temporary storage")
-    if resolved.exists():
-        raise FinalizationError("Output path already exists; refusing to overwrite it")
+    validate_new_protected_path(
+        output_path,
+        repository_root=repository_root,
+        temporary_root=temporary_root,
+    )
 
 
 def _write_approved_report(report: Mapping[str, Any], output_path: Path) -> None:
-    try:
-        descriptor = os.open(output_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        with os.fdopen(descriptor, "w", encoding="utf-8") as output_file:
-            json.dump(report, output_file, indent=2)
-            output_file.write("\n")
-    except FileExistsError as error:
-        raise FinalizationError(
-            "Output path already exists; refusing to overwrite it"
-        ) from error
-    except OSError as error:
-        raise FinalizationError("Could not write protected approval report") from error
+    write_private_json(output_path, report)
 
 
 def build_parser() -> argparse.ArgumentParser:
