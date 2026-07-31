@@ -350,3 +350,7 @@ def main() -> None:
         training_commit=args.training_commit or resolve_training_commit(Path(__file__).parents[3]),
         resume=args.resume,
     )
+
+
+if __name__ == "__main__":
+    main()
