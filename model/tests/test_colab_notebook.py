@@ -21,6 +21,12 @@ def test_colab_notebook_has_safe_recoverable_workflow() -> None:
     assert '"--resume"' in source
     assert 'drive.mount("/content/drive")' in source
     assert "shutil.rmtree(DATA_ROOT" in source
+    assert "from google.colab import errors" not in source
+    assert "except userdata.SecretNotFoundError:" in source
+    assert "except Exception as exc:" not in source
+    assert "if gpu_check.returncode != 0:" in source
+    assert "print(gpu_check.stderr)" in source
+    assert 'RuntimeError("TensorFlow GPU check failed.")' in source
     assert not re.search(r"\b(?:hf|github_pat)_[A-Za-z0-9_]{10,}\b", source)
     assert all(
         cell.get("outputs", []) == []
