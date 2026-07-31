@@ -1,120 +1,54 @@
-# AGENTS.md
+# Repository Guide
 
-## Agent Quickstart
+BBCDS is a static Vite/React prototype for future browser-only video
+moderation. Read `docs/implementation-status.md` before assuming a milestone is
+implemented. Stable constraints live in `ARCHITECTURE.md`; testing policy lives
+in `docs/testing.md`.
 
-- Read `docs/implementation-status.md` before making implementation-status assumptions.
-- Install dependencies with `pnpm install`.
-- Run the app with `pnpm dev`.
-- Use `pnpm check` as the primary handoff validation.
-- Use `pnpm test:e2e` for the default Chromium browser smoke test. Run `pnpm exec playwright install chromium` first if Chromium is missing.
-- Use `pnpm test:e2e:full` only when all Playwright browsers are installed with `pnpm exec playwright install`.
-- Edit the UI shell in `src/App.tsx` and `src/index.css`.
-- Add unit tests beside source files as `src/*.test.tsx`.
-- Add browser tests in `tests/e2e`.
-- Keep model contracts in `model`.
-- Record accepted architecture decisions in `docs/adr` and testing strategy in `docs/testing.md`.
+## Commands
 
-## Ground Rules
+- Install: `pnpm install`
+- Develop: `pnpm dev`
+- Main quality gate: `pnpm check`
+- Chromium smoke test: `pnpm test:e2e`
+- Model checks: `cd model && make check`
 
-- Use official setup, install, and generation commands where available.
-- Follow `ARCHITECTURE.md` and `docs/adr` for product decisions.
-- Keep inference browser-only: no server-side video processing and no external inference API.
-- Ask before adding network calls, analytics, service workers, cross-origin isolation headers, model/runtime dependencies, model artifacts, or external processing paths.
-- Do not commit harmful-content fixtures, source video files, thumbnails, frame pixels, filenames, URLs, or class probabilities.
+Use Node 24, pnpm 11, and the repository's configured tools. Install all
+Playwright browsers only when `pnpm test:e2e:full` is required.
 
-## Skill Usage
+## Hard Boundaries
 
-- Use a skill when the user names it, the task clearly matches its domain, or it materially improves correctness for the requested change.
-- Read the selected skill's `SKILL.md` before acting, then follow its workflow instead of improvising a parallel process.
-- Prefer the most specific applicable skill. Do not load unrelated skills just because they are available.
-- State which skill is being used when it changes the implementation, validation, or final reporting workflow.
-- If multiple skills apply, use them in task order: build or refactor first, then validate or audit.
+- Keep inference browser-only. Do not add a backend, external inference,
+  uploads, analytics, service workers, or cross-origin isolation without
+  explicit approval.
+- Do not commit protected media, filenames, URLs, thumbnails, frame pixels,
+  class probabilities, manifests, reports, logs, checkpoints, or model files.
+- Ask before adding model/runtime dependencies or artifacts.
+- Follow `ARCHITECTURE.md` and accepted ADRs. Record a new ADR only when an
+  architecture decision changes.
 
-### Frontend Testing Debugging
+## Change Discipline
 
-Use `frontend-testing-debugging` for rendered frontend work: UI bugs, interaction failures, responsive layout issues, console/runtime errors, visual QA, local app smoke tests, and targeted improvements to visible app surfaces.
+- Search the repository before adding a file, abstraction, test, or command.
+- Prefer the smallest direct change that satisfies a current requirement. Do
+  not scaffold future milestones or add compatibility for unreleased internals.
+- Keep one source of truth per topic and link to it instead of repeating it.
+- Add a new file only for a distinct owned boundary or durable contract.
+- Preserve unrelated work in a dirty tree and avoid broad formatting churn.
 
-When using it:
+## Testing
 
-- Define the target flow before validation, for example `app loads -> first meaningful screen renders -> primary interaction works`.
-- Use the Browser plugin path when it is available. If it is not available, use Playwright and record that Browser was unavailable.
-- For non-trivial UI changes, verify page identity, nonblank render, absence of framework error overlays, console health, screenshot evidence, and at least one interaction proof.
-- Check desktop and one mobile-sized viewport when the change affects layout, wrapping, spacing, or responsiveness.
-- A passing build is not enough for a rendered UI change; validate the actual browser behavior.
+- Extend the closest test and assert observable behavior through the narrowest
+  stable boundary. Do not mirror the source tree or add tests for coverage.
+- Do not assert source text, private calls, exact markup, or incidental counts.
+  Artifact inspection is reserved for security/privacy properties that runtime
+  tests cannot prove, such as omitted secrets or notebook outputs.
+- Use benign, deterministic fixtures. Never add protected-content fixtures.
+- For rendered UI changes, verify the real flow with Playwright in desktop and
+  mobile viewports when layout or interaction can change.
+- Run the focused check first, then `pnpm check`; run `model/make check` for
+  model changes and Playwright for rendered frontend changes.
 
-### React Best Practices
-
-Use `react-best-practices` when writing, reviewing, or refactoring React components, state/effect logic, data flow, client-side fetching, bundle-sensitive code, or performance-sensitive UI.
-
-When using it:
-
-- Prefer direct imports over broad barrel imports.
-- Lazy-load heavy modules only when the feature is activated.
-- Keep effect dependencies primitive and stable where practical.
-- Do not define components inside components.
-- Derive state during render when possible instead of mirroring it through effects.
-- Avoid memoization unless it removes measurable work or prevents a real render problem.
-- Apply browser-only constraints from `ARCHITECTURE.md`; ignore server-side recommendations that do not fit this static Vite app.
-
-### Skill Selection Examples
-
-- UI bug, visual regression, local browser smoke test, or layout issue: use `frontend-testing-debugging`.
-- React component/API refactor or performance-sensitive React work: use `react-best-practices`.
-- New visual screen or substantial redesign: use `frontend-app-builder`, then `frontend-testing-debugging`.
-- Accessibility or design audit requested by the user: use `web-design-guidelines`.
-- Docs, prose, voice, or tone audit requested by the user: use `writing-guidelines`.
-
-## Required Checks
-
-Before finishing code changes, run the most targeted check plus:
-
-- `pnpm format:check`
-- `pnpm lint`
-- `pnpm typecheck`
-- `pnpm test:unit`
-- `pnpm build`
-
-Run `pnpm check` before broader handoff when practical.
-
-## Test Authoring
-
-- Before writing a test, search the existing suite and identify the behavior,
-  risk, and test layer already covering the area. Extend the closest test when
-  that keeps the failure focused.
-- Add a test when a behavior, contract, security boundary, or prior defect is
-  likely to regress. Do not add tests only to increase coverage or mirror the
-  source tree.
-- Test through the narrowest stable public boundary that proves the behavior.
-  Prefer unit tests for pure logic, integration tests for owned boundaries, and
-  browser tests for critical user flows.
-- Assert observable outcomes and invariants, not private calls, source text,
-  exact markup structure, generated file ordering, or incidental counts.
-- A defect fix should include a regression test that fails without the fix when
-  practical.
-- Keep tests deterministic and hermetic. Seed randomness, use temporary
-  directories, control time, and do not depend on test order, external
-  networks, shared accounts, or machine-specific state.
-- Use real production code with the smallest realistic fixture. Mock only
-  external or expensive boundaries; do not mock the behavior under test.
-- Avoid duplicate coverage. Extend or parameterize the closest existing test,
-  and share setup only after genuine repetition appears.
-- Keep one clear reason for failure per test. Prefer focused assertions over
-  broad snapshots. Use tolerances for floating-point and timing-sensitive
-  values.
-- Do not test static schemas, configuration text, or generated artifacts when
-  an executable path already validates the same contract. Artifact tests are
-  justified for security, compatibility, or release gates that runtime tests
-  cannot cover.
-- After adding stronger coverage, remove tests that became redundant or
-  implementation-coupled. Do not retain both versions for reassurance.
-- Run the targeted test first, then the required repository checks. Document
-  any check that cannot run and why. In the handoff, state the behavior and risk
-  covered rather than only reporting the test count.
-
-## Future Product Invariants
-
-- One frame/classification in flight.
-- Request and scan identifiers on async worker communication.
-- Explicit cleanup for workers, object URLs, ImageBitmap instances, tensors, and cached resources.
-- No negative early exit before required coverage.
-- Sampling, label-order, preprocessing, quantization, or threshold changes require tests and benchmark evidence.
+Before handoff, inspect `git status`, `git diff --stat`, and `git diff --check`.
+Remove generated artifacts, redundant tests, stale documentation, and unrelated
+formatting changes.

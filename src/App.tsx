@@ -1,7 +1,6 @@
 import { useId, useState } from 'react'
 
 type SourceMode = 'file' | 'url'
-type UiState = 'idle' | 'source-selected' | 'blocked-pending-model'
 type ReadinessState = 'ready' | 'active' | 'waiting'
 
 interface ReadinessItem {
@@ -40,10 +39,6 @@ function formatFileSize(bytes: number) {
   return `${bytesFormatter.format(value)} ${unit}`
 }
 
-function getUiState(selectedFile: File | null): UiState {
-  return selectedFile === null ? 'idle' : 'source-selected'
-}
-
 function getStatusMessage(selectedFile: File | null) {
   if (selectedFile === null) {
     return 'Choose a video to prepare the local safety check.'
@@ -66,7 +61,7 @@ function getReadiness(selectedFile: File | null): ReadinessItem[] {
     },
     {
       label: 'Analysis',
-      detail: 'Disabled until baseline release',
+      detail: 'Disabled until model artifact release',
       state: 'waiting',
     },
     {
@@ -82,10 +77,9 @@ function App() {
   const [sourceMode, setSourceMode] = useState<SourceMode>('file')
   const fileInputId = useId()
   const urlInputId = useId()
-  const uiState = getUiState(selectedFile)
   const readiness = getReadiness(selectedFile)
   const statusMessage = getStatusMessage(selectedFile)
-  const analysisBlocked = uiState === 'source-selected'
+  const analysisBlocked = selectedFile !== null
 
   return (
     <main className="app-shell" id="main-content">
@@ -144,8 +138,8 @@ function App() {
 
           {analysisBlocked ? (
             <p className="blocked-note" id="analysis-blocked-note">
-              Model artifact pending. Analysis will be enabled after the
-              baseline release milestone is complete.
+              Model artifact pending. Analysis will be enabled after the model
+              artifact milestone is complete.
             </p>
           ) : null}
         </section>
@@ -157,7 +151,7 @@ function App() {
               <h2 id="status-title">Safety-check status</h2>
             </div>
             <span className="status-badge subdued">
-              {uiState === 'idle' ? 'Waiting' : 'Prepared'}
+              {selectedFile === null ? 'Waiting' : 'Prepared'}
             </span>
           </div>
 

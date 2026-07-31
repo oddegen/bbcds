@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "releaseId": "baseline-v1",
+  "reportId": "baseline-0b92626ea18e",
+  "trainingCommit": "0b92626ea18e",
+  "datasetManifestHash": "46c18a29ac0436b6b7dfe72e9919cc6ad49fd29309bbe5bc3851b2ad3e122e95",
+  "datasetAuditHash": "4d867790c59aa744450f7a7acada6dd0e5e0c4724075f4f64741d201a13037f5",
+  "draftReportHash": "7a12e38a61a64a8a2f62639882efd8a4e4dd35de71e02d7f74bbe8329f796176",
+  "checkpointHash": "eaa36900095460cf8c1ccb78c968381277d61279cc69583d42e31d676fab2692",
+  "confusionMatrixHash": "54bca56e23543360e098244a35751d3ebd6267cf4823668fc7d1b418a2da675b",
+  "profile": "deepghs-nsfw-detect",
+  "seed": 20260731,
+  "labels": ["Safe", "Suggestive", "Explicit", "Explicit Illustration"],
+  "evaluationSplit": {
+    "name": "validation",
+    "recordCount": 2781,
+    "sourceGroupCount": 2773
+  },
+  "threshold": 0.43000000000000005,
+  "calibrationStatus": "exploratory"
+}

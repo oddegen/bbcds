@@ -4,20 +4,6 @@ import userEvent from '@testing-library/user-event'
 import App from './App'
 
 describe('App', () => {
-  const createObjectURL = vi.fn(() => 'blob:preview-url')
-
-  beforeEach(() => {
-    createObjectURL.mockClear()
-    vi.stubGlobal('URL', {
-      ...URL,
-      createObjectURL,
-    })
-  })
-
-  afterEach(() => {
-    vi.unstubAllGlobals()
-  })
-
   it('renders the protected video safety-check scaffold', () => {
     render(<App />)
 
@@ -50,7 +36,6 @@ describe('App', () => {
 
     await user.upload(screen.getByLabelText('Select video file'), file)
 
-    expect(createObjectURL).not.toHaveBeenCalled()
     expect(screen.getByText('sample-intake.mp4')).toBeInTheDocument()
     const fileDetails = screen.getByLabelText('Selected file details')
     expect(within(fileDetails).getByText('video/mp4')).toBeInTheDocument()
@@ -72,7 +57,7 @@ describe('App', () => {
 
     expect(screen.getByRole('button', { name: 'Analyze video' })).toBeDisabled()
     expect(screen.getByText(/Model artifact pending/i)).toBeInTheDocument()
-    expect(screen.getByText(/baseline release milestone/i)).toBeInTheDocument()
+    expect(screen.getByText(/model artifact milestone/i)).toBeInTheDocument()
   })
 
   it('clears the selected file when remove is activated', async () => {

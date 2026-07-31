@@ -1,135 +1,137 @@
-# BBCDS Model Card
-
-No model is bundled yet. This file is the public template for the protected
-model card that must accompany the first approved baseline and every later
-model release.
+# BBCDS Model Card: MobileNetV3-Small Baseline V1
 
 ## Model Details
 
-- Model name:
-- Version:
-- Status:
-- Owner:
-- Training commit:
+- Model name: BBCDS MobileNetV3-Small.
+- Version: `baseline-v1`.
+- Status: approved image-level research baseline; production calibration and
+  video-level performance are not approved.
+- Owner: BBCDS project.
+- Training commit: `0b92626ea18e`.
 - Dataset manifest hash:
-- Model family: project-owned MobileNetV3-Small.
+  `46c18a29ac0436b6b7dfe72e9919cc6ad49fd29309bbe5bc3851b2ad3e122e95`.
+- Checkpoint hash:
+  `eaa36900095460cf8c1ccb78c968381277d61279cc69583d42e31d676fab2692`.
+- Release policy: `model/baseline-v1-policy.json`.
+- Approved report reference:
+  `protected://model-runs/baseline-v1-validation-approved.json`.
+- Approved report hash:
+  `d7abe560e12346ce967e0ab70d488a55f31ebe1ded7d5f0e99a1b47176418d16`.
+- Model family: project-owned MobileNetV3-Small initialized from ImageNet weights.
 - Input contract: RGB, NHWC, `1 x 224 x 224 x 3`, float32 values in `[0,255]`.
 - Runtime target: browser-only LiteRT.js in a dedicated worker.
-- Release artifact: none in this repository yet.
+- Release artifact: none. TFLite conversion and compatibility are the next milestone.
 
 ## Uses
 
-BBCDS targets local, browser-only video review for a narrow visual sexual-content
-taxonomy. The public result shape is documented in `ARCHITECTURE.md`; confidence
-is a documented heuristic until calibrated on a held-out video set.
+BBCDS targets local, browser-only video review for a narrow visual
+sexual-content taxonomy. This baseline only establishes image-level evidence;
+it does not establish video sampling or policy performance.
 
-Intended users:
+Intended uses:
 
-- Product engineers integrating local video review.
-- Reviewers validating model behavior against the accepted taxonomy.
-- Release approvers checking evidence before artifact publication.
+- Research and model-artifact conversion for the BBCDS prototype.
+- Image-level evaluation against the accepted taxonomy.
+- Future local classification of sampled video frames after artifact release.
 
-Direct use:
+Prohibited uses:
 
-- Classify sampled video frames locally in the browser.
-- Aggregate frame evidence into the documented public result shape.
-
-Prohibited use:
-
-- Do not use as universal inappropriate-content detection.
-- Do not use for automated enforcement without human-review policy.
-- Do not use for audio, text, violence, self-harm, drugs, hate, or identity
-  classification.
+- Universal inappropriate-content detection or automated enforcement without
+  human-review policy.
+- Audio, text, violence, self-harm, drugs, hate, or identity classification.
+- Production claims based on the exploratory threshold or image-only evidence.
 
 ## Taxonomy
 
-The canonical label order is defined in `model/labels.json`:
+Outputs use the canonical order from `model/labels.json`:
 
-- `Safe`
-- `Suggestive`
-- `Explicit`
-- `Explicit Illustration`
+1. `Safe`
+2. `Suggestive`
+3. `Explicit`
+4. `Explicit Illustration`
 
-Policy code must consume labels by name and must not rely on undocumented output
-indexes.
+Consumers must use labels by name rather than undocumented output indexes.
 
 ## Training Data
 
-Complete this section from the protected data card:
+- Dataset: research snapshot prepared from `deepghs/nsfw_detect`.
+- Version: unversioned upstream snapshot accessed for the 2026-07-31 run.
+- Accepted records: 27,803 from 28,000 scanned images.
+- Splits: 22,242 train; 2,781 validation; 2,780 test.
+- Label distribution: 11,134 Safe; 5,543 Suggestive; 5,559 Explicit;
+  5,567 Explicit Illustration.
+- Exclusions and grouping: 191 exact duplicates, 8 conflicting-cluster records,
+  367 accepted near-duplicate clusters, 0 corrupt records, and 0 policy exclusions.
+- Source groups: 27,395 with source-grouped split isolation.
 
-- Dataset name:
-- Dataset version:
-- Dataset manifest hash:
-- Split counts:
-- Label distribution:
-- Collection summary:
-- Exclusions:
-
-Do not include protected media paths, source filenames, URLs, thumbnails, frame
-pixels, or class probabilities.
+The upstream repository declares MIT, but provenance, consent, and training
+rights are not documented for every underlying image. This model is therefore
+restricted to a research baseline and is not commercially cleared.
 
 ## Training Procedure
 
-Complete this section only from the protected training process:
-
-- Backbone initialization:
-- Head-training configuration:
-- Fine-tuning configuration:
-- Early-stopping criteria:
-- Random seed handling:
-- Hardware and runtime:
-- Training duration:
-- Checkpoint reference:
+- Backbone initialization: ImageNet-pretrained MobileNetV3-Small.
+- Input preparation: aspect-preserving RGB letterbox to 224 by 224; model-side
+  MobileNetV3 preprocessing; float32 `[0,255]` input.
+- Head training: batch size 64, up to 15 epochs, AdamW learning rate `3e-4`,
+  weight decay `1e-4`, and class weighting.
+- Fine-tuning: final 30 backbone layers eligible for training, batch-normalization
+  layers frozen, up to 20 epochs, AdamW learning rate `1e-5`, and weight decay `1e-5`.
+- Training controls: seed `20260731`; best-checkpoint restoration; early stopping
+  after five unimproved validation-loss epochs; learning-rate reduction after two.
+- Hardware/runtime: Google Colab GPU workflow; exact accelerator was not retained.
+- Duration: not retained in the public-safe run metadata.
 
 ## Evaluation
 
-Completed cards must summarize held-out evidence without exposing protected
-records or raw class vectors:
+- Evaluation date: 2026-07-31.
+- Scope: image-level held-out validation for threshold selection and per-class evidence.
+- Validation records/source groups: 2,781 / 2,773.
+- Macro F1: `0.8644`.
+- Binary policy at exploratory threshold `0.43`: precision `0.8277`, recall
+  `0.9021`, F1 `0.8633`.
+- Separate held-out test accuracy: `0.8640`; no approved test-set calibration or
+  per-class report was retained.
 
-- Evaluation split:
-- Evaluation date:
-- Sample count:
-- Factors evaluated:
-- Metrics:
-- Macro F1:
-- Per-class precision/recall/F1:
-- Confusion matrix reference:
-- Threshold rationale:
-- Calibration status:
-- Known failure modes:
-- Approval status:
+| Label                 | Support | Precision | Recall |     F1 |
+| --------------------- | ------: | --------: | -----: | -----: |
+| Safe                  |   1,114 |    0.9088 | 0.8411 | 0.8737 |
+| Suggestive            |     554 |    0.7934 | 0.9495 | 0.8644 |
+| Explicit              |     556 |    0.9545 | 0.8309 | 0.8885 |
+| Explicit Illustration |     557 |    0.7993 | 0.8654 | 0.8310 |
 
-Detailed validation metadata belongs in a report that conforms to
-`model/baseline-validation.schema.json`.
+- Confusion-matrix reference: protected evidence hash
+  `54bca56e23543360e098244a35751d3ebd6267cf4823668fc7d1b418a2da675b`.
+- Calibration: exploratory. Threshold `0.43` is not a production calibration claim.
+- Approval: completed by `project-owner` as an image-level research baseline
+  for model-artifact conversion. The threshold remains exploratory.
 
 ## Bias, Risks, And Limitations
 
-Completed cards must document:
+- Collection provenance, consent, demographic coverage, geography, and source-domain
+  coverage are incompletely documented.
+- Labels inherit upstream ambiguity and were not independently re-annotated under a
+  documented multi-reviewer BBCDS protocol.
+- Safe recall of `0.8411` indicates false-positive risk; Explicit recall of
+  `0.8309` indicates false-negative risk.
+- Image-level evaluation does not measure compression, motion blur, transitions,
+  temporal context, sparse sampling, or video-level aggregation.
+- Illustration performance does not establish coverage of every synthetic or
+  stylized visual domain.
 
-- Known collection and label bias.
-- Under-supported factors or labels.
-- Image-level versus video-level evaluation limits.
-- Sparse-sampling risk.
-- False-positive and false-negative consequences.
-- Recommended mitigations.
+Mitigations are human review, conservative research-only use, protected error
+analysis, held-out video evaluation, explicit threshold calibration, and parity
+and browser benchmarks before any product claim.
 
-## Governance
+## Governance And Maintenance
 
-- Protected media and source identifiers must remain outside the public repo.
-- Dataset entries must preserve source-group isolation across splits.
-- Reviews must include provenance, label quality, annotator safety, and scope
-  limitations.
-- Public documentation may reference opaque hashes and protected artifact
-  locations, but must not reveal sensitive content or source identities.
+- Protected media, manifests, logs, reports, and model artifacts remain outside Git.
+- Update owner and release approver: BBCDS project owner.
+- Review cadence: at every dataset, taxonomy, preprocessing, threshold, or artifact change.
+- Retraining triggers: material data-quality improvements, documented distribution
+  shift, or failure to meet later video-level evidence gates.
+- Deprecation: supersede this baseline when a fully evidenced replacement is approved.
+- Rollback artifact: protected Keras checkpoint identified by the hash above.
 
-## Maintenance
-
-- Update owner:
-- Review cadence:
-- Retraining trigger:
-- Deprecation policy:
-- Rollback artifact:
-
-A later `.tflite` release must include checksums, preprocessing contract, parity
-evidence, LiteRT compatibility evidence, benchmark evidence, and an updated
-model manifest.
+A later `.tflite` release requires quantization, checksums, preprocessing and
+label contracts, Keras/TFLite parity, LiteRT.js compatibility, and benchmark evidence.

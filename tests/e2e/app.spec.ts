@@ -46,7 +46,7 @@ test('selecting a local video keeps the preview protected', async ({
   await expect(
     page.getByRole('button', { name: 'Analyze video' }),
   ).toBeDisabled()
-  await expect(page.getByText(/baseline release milestone/i)).toBeVisible()
+  await expect(page.getByText(/model artifact milestone/i)).toBeVisible()
 })
 
 test('URL mode explains the current milestone boundary', async ({ page }) => {

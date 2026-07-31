@@ -1,93 +1,70 @@
 # Model
 
-This directory owns the model contract for the future LiteRT.js moderation runtime.
+This directory owns model training and release contracts. No model artifact is
+bundled. Protected data, manifests, reports, logs, checkpoints, `.keras`, and
+`.tflite` files must stay outside Git.
 
-No model artifact is bundled yet. Do not commit training data, protected dataset manifests, source media, extracted frames, thumbnails, benchmark exports, checkpoints, or `.tflite` files.
-
-## Training Tooling
-
-The `src/bbcds_model` package contains public-safe training code for the
-protected baseline process. It expects a local CSV manifest with paths to
-protected image files and trains an ImageNet-pretrained MobileNetV3-Small
-classifier with the repository's canonical four-class taxonomy.
-
-Set up the Python environment from this directory:
+## Setup and Checks
 
 ```sh
 uv sync
-```
-
-Run ML checks:
-
-```sh
 make check
 ```
 
-Prepare the gated research dataset after it has been downloaded and extracted:
+For a computer without a suitable GPU, use
+[`notebooks/train-colab.ipynb`](notebooks/train-colab.ipynb) with the
+[training guide](../docs/model-training.md).
+
+## Prepare and Train
 
 ```sh
 uv run python -m bbcds_model.prepare_manifest \
-  --dataset-root /content/bbcds-data/nsfw_dataset_v1 \
-  --output /content/bbcds-data/dataset.csv \
+  --dataset-root /path/to/protected/nsfw_dataset_v1 \
+  --output /path/to/protected/dataset.csv \
   --profile deepghs-nsfw-detect \
   --seed 20260731
-```
 
-Run or recover a protected training job:
-
-```sh
 uv run python -m bbcds_model.train \
   --manifest /path/to/protected/dataset.csv \
   --resume
 ```
 
-For a computer without a suitable GPU, use
-[`notebooks/train-colab.ipynb`](notebooks/train-colab.ipynb) and follow the
-[model training guide](../docs/model-training.md).
+The manifest loader validates files, hashes, canonical labels, required splits,
+and source-group isolation. The preparation profile verifies images, removes
+exact duplicates, groups perceptual near-duplicates, excludes conflicting
+groups, and writes an adjacent protected aggregate audit.
 
-The training command records the current Git commit in the protected validation
-report. If the command runs outside a Git checkout, pass
-`--training-commit <commit>` through `uv run python -m bbcds_model.train`.
+Training records the current Git commit. When running outside a Git checkout,
+pass `--training-commit <commit>` to the training command.
 
-The training manifest is a protected input and must not be committed. A
-public-safe shape example lives at `examples/training-manifest.example.csv`.
-Required columns are:
+## Finalize a Baseline
 
-- `path`
-- `label`
-- `source_id`
-- `split`
-- `media_type`
-- `license`
-- `sha256`
+```sh
+uv run python -m bbcds_model.finalize_baseline \
+  --policy baseline-v1-policy.json \
+  --manifest /path/to/protected/dataset.csv \
+  --audit /path/to/protected/dataset.audit.json \
+  --draft /path/to/protected/baseline-validation-draft.json \
+  --checkpoint /path/to/protected/final.keras \
+  --confusion-matrix /path/to/protected/validation-confusion-matrix.json \
+  --approver project-owner \
+  --output /durable/protected/baseline-validation-approved.json
+```
 
-Relative paths are resolved from the manifest file's directory. The loader
-verifies file existence, SHA-256 hashes, canonical labels, required splits, and
-source-group isolation before training.
+The command binds every protected input to the pinned policy, validates the
+report contract, recomputes manifest aggregates and source isolation, checks
+the threshold and artifact references, and prints only aggregate evidence. It
+refuses Git-worktree, temporary, or existing outputs and creates the approved
+report with owner-only permissions (`0600`).
 
-The `deepghs-nsfw-detect` preparation profile verifies images with Pillow,
-deduplicates SHA-256 matches, groups perceptual near-duplicates, excludes
-conflicting-label groups, and creates deterministic source-grouped splits. Its
-adjacent audit JSON contains aggregate counts only. Both files are protected
-inputs and must remain outside Git.
-
-Training outputs under `runs`, checkpoints, reports, `.keras`, and `.tflite`
-files are ignored because they may contain protected evidence or model
-artifacts. Public commits may contain only approved aggregate summaries, opaque
-hashes, and completed card text.
-
-Each completed training run writes an ignored `baseline-validation-draft.json`
-and protected aggregate evidence under the run directory. Review that draft
-against `baseline-validation.schema.json` before copying approved summaries into
-public model and data cards.
-
-The public-safe evidence contract is defined by:
+## Public Contracts
 
 - `labels.json`: canonical label order.
-- `dataset-manifest.schema.json`: protected dataset metadata shape.
-- `baseline-validation.schema.json`: protected validation report shape.
-- `manifest.schema.json`: future `.tflite` release manifest shape.
+- `dataset-manifest.schema.json`: protected training-manifest shape.
+- `baseline-validation.schema.json`: validation and approval report.
+- `baseline-v1-policy.json`: pinned hashes and gates for this release.
+- `manifest.schema.json`: future TFLite release manifest.
 
-Future releases must provide a quantized MobileNetV3-Small `.tflite` artifact with float32 input/output boundaries, checksums, label order, preprocessing contract, model card, data card, parity evidence, LiteRT compatibility evidence, protected evaluation evidence, and benchmark evidence.
-
-The canonical label order is defined in `labels.json`. Policy code must not rely on undocumented output indexes.
+The next milestone is a quantized MobileNetV3-Small TFLite artifact with label,
+preprocessing, checksum, parity, LiteRT.js compatibility, and benchmark
+evidence.
