@@ -6,7 +6,7 @@
   "trainingCommit": "0b92626ea18e",
   "datasetManifestHash": "46c18a29ac0436b6b7dfe72e9919cc6ad49fd29309bbe5bc3851b2ad3e122e95",
   "checkpointHash": "eaa36900095460cf8c1ccb78c968381277d61279cc69583d42e31d676fab2692",
-  "approvedBaselineReportHash": "d7abe560e12346ce967e0ab70d488a55f31ebe1ded7d5f0e99a1b47176418d16",
+  "approvedBaselineReportHash": "250255d5211c5f47af99a414357bf2da7e66f38fb9a71d4b93f8ae6d257c19e7",
   "labels": ["Safe", "Suggestive", "Explicit", "Explicit Illustration"],
   "input": {
     "shape": [1, 224, 224, 3],
