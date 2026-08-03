@@ -394,6 +394,7 @@ dd {
 
 .primary-action {
   width: 100%;
+  cursor: pointer;
 }
 
 .primary-action:disabled {
@@ -408,6 +409,145 @@ dd {
   background: #fff8e5;
   color: #725a12;
   padding: 12px 14px;
+}
+
+.scanning-card,
+.result-card,
+.error-card {
+  gap: 20px;
+}
+
+.progress-block {
+  display: grid;
+  gap: 8px;
+}
+
+.progress-block progress {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: #e8ebf1;
+  color: #4968d9;
+}
+
+.progress-block progress::-webkit-progress-bar {
+  border-radius: 999px;
+  background: #e8ebf1;
+}
+
+.progress-block progress::-webkit-progress-value {
+  border-radius: 999px;
+  background: #4968d9;
+}
+
+.progress-block progress::-moz-progress-bar {
+  border-radius: 999px;
+  background: #4968d9;
+}
+
+.progress-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #555f73;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.result-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.result-heading > div {
+  display: grid;
+  gap: 3px;
+}
+
+.result-icon {
+  width: 42px;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  border: 2px solid #758096;
+  border-radius: 999px;
+  background: #f5f6f8;
+}
+
+.result-safe .result-icon {
+  border-color: #248a57;
+  background: #e9f7ef;
+}
+
+.result-warning .result-icon {
+  border-color: #b7791f;
+  background: #fff8e5;
+}
+
+.result-message,
+.confidence-note,
+.reveal-dialog p {
+  color: #555f73;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.confidence-note {
+  border: 1px solid #e2e4e8;
+  border-radius: 14px;
+  background: #f7f8fa;
+  padding: 12px 14px;
+}
+
+.result-video {
+  display: block;
+  width: 100%;
+  max-height: min(65vh, 520px);
+  border-radius: 16px;
+  background: #10131a;
+}
+
+.danger-button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  background: #9b2c2c;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 0.94rem;
+  font-weight: 650;
+  padding: 11px 15px;
+}
+
+.reveal-dialog {
+  width: min(calc(100% - 32px), 460px);
+  border: 1px solid #d9dde5;
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgb(16 24 40 / 0.24);
+  padding: 20px;
+}
+
+.reveal-dialog::backdrop {
+  background: rgb(16 24 40 / 0.58);
+}
+
+.reveal-dialog h2 {
+  margin-bottom: 8px;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .url-panel {
@@ -515,7 +655,8 @@ dd {
 button:focus-visible,
 label:focus-within,
 summary:focus-visible,
-input:focus-visible {
+input:focus-visible,
+video:focus-visible {
   outline: 3px solid rgb(73 104 217 / 0.28);
   outline-offset: 3px;
 }
@@ -542,7 +683,8 @@ input:focus-visible {
 
 @media (max-width: 420px) {
   .card-header,
-  .action-row {
+  .action-row,
+  .dialog-actions {
     grid-template-columns: 1fr;
   }
 

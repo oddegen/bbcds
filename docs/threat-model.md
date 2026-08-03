@@ -28,7 +28,11 @@ integrity of approved model artifacts.
 
 ## Out of Scope Today
 
-The current shell does not load a model or analyze video. Browser inference,
-worker isolation, URL handling, sampling, playback restriction, cross-browser
-coverage, and product performance require milestone-specific threat review
-before implementation.
+The current app decodes local files, transfers one frame at a time to a module
+worker, samples under fixed bounds, and enforces protected result states. The
+worker validates an approved manifest, artifact size, SHA-256, tensor contract,
+and output probability contract before operational inference. Missing manifests
+select a non-decision demo classifier; invalid configured releases fail closed.
+
+Direct URL handling, artifact release approval, calibrated video-level policy,
+cross-browser release coverage, and product performance remain out of scope.

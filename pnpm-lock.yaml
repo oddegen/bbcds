@@ -7,6 +7,9 @@ settings:
 importers:
   .:
     dependencies:
+      '@litertjs/core':
+        specifier: 2.5.3
+        version: 2.5.3
       react:
         specifier: ^19.2.7
         version: 19.2.8
@@ -20,9 +23,6 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.8.0(supports-color@7.2.0))
-      '@litertjs/core':
-        specifier: 2.5.3
-        version: 2.5.3
       '@playwright/test':
         specifier: ^1.62.0
         version: 1.62.0

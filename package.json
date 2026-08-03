@@ -34,11 +34,11 @@
     "*.{ts,tsx,js,jsx}": "oxlint"
   },
   "dependencies": {
+    "@litertjs/core": "2.5.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@litertjs/core": "2.5.3",
     "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.0",

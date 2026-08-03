@@ -13,8 +13,10 @@ The future workflow is:
 4. Reveal playback only after a safe result, or keep sensitive content covered.
 5. Allow removal or a clean restart after completion, cancellation, or failure.
 
-The current shell stops after source selection because no model artifact or
-browser inference runtime is bundled.
+The current local-file flow continues through bounded scanning and a result
+view. When no approved model is installed, it completes in an explicitly
+labelled demo state that makes no safety decision and keeps playback covered.
+Direct URL analysis remains disabled.
 
 ## Safety Gate
 
@@ -38,6 +40,11 @@ browser inference runtime is bundled.
   permits immediate restart. It is not an error.
 - Throttle visible progress; decoded frames, bitmaps, tensors, and pixel buffers
   never belong in React state.
+- The local scan uses 2–24 whole-video anchors at roughly ten-second spacing.
+  An elevated anchor may add up to four neighboring samples, with 28 total
+  samples and 90 seconds as hard upper bounds.
+- A sensitive early exit requires two above-threshold samples. A lone elevated
+  sample, timeout, decode failure, or incomplete coverage never clears playback.
 
 ## Accessibility
 
@@ -55,6 +62,10 @@ browser inference runtime is bundled.
 Worker events flow through an analysis controller into throttled public state;
 React renders that state. Decoding, inference, aggregation, and resource
 lifecycle do not live in visual components.
+
+The worker first requests `/models/model-manifest-approved.json`. A missing
+manifest selects demo mode. A present but invalid manifest or artifact is a
+blocking setup error rather than a demo fallback.
 
 UI depends on feature orchestration, which depends on domain contracts and
 infrastructure. Domain and worker modules remain independent of React.
