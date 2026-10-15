@@ -12,11 +12,11 @@ dependencies = [
     "pillow>=10.4.0",
     "pyyaml>=6.0.2",
     "scikit-learn>=1.5.1",
-    "tensorflow>=2.16.1,<2.17",
+    "tensorflow>=2.16.1,<2.22",
 ]
 
 [project.optional-dependencies]
-gpu = ["tensorflow[and-cuda]>=2.16.1,<2.17"]
+gpu = ["tensorflow[and-cuda]>=2.16.1,<2.22"]
 
 [build-system]
 requires = ["hatchling"]
